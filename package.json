@@ -22,6 +22,7 @@
   "dependencies": {
     "@aws-cdk/lambda-layer-kubectl-v27": "^2.0.0",
     "aws-cdk-lib": "2.111.0",
+    "cdk-karpenter": "^4.1.2",
     "constructs": "^10.0.0",
     "source-map-support": "^0.5.21"
   }

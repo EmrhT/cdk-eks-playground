@@ -3,7 +3,9 @@ import { Construct } from 'constructs';
 import * as eks from 'aws-cdk-lib/aws-eks';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import { KubectlV27Layer } from '@aws-cdk/lambda-layer-kubectl-v27';
-import { CfnOutput } from 'aws-cdk-lib';
+import { CfnOutput, Duration } from 'aws-cdk-lib';
+import { Karpenter, AMIFamily, ArchType, CapacityType } from "cdk-karpenter";
+import { InstanceClass, InstanceSize, InstanceType, EbsDeviceVolumeType, Vpc } from 'aws-cdk-lib/aws-ec2';
 
 
 export class PlaygroundEksStack extends cdk.Stack {
@@ -66,6 +68,45 @@ export class PlaygroundEksStack extends cdk.Stack {
     bucket.grantReadWrite(serviceAccount);
     new CfnOutput(this, 'ServiceAccountIamRole', { value: serviceAccount.role.roleArn });
 
+    
+    const karpenter = new Karpenter(this, 'karpenter', {
+      cluster,
+      vpc,
+    });
+
+    // custom provisoner - kitchen sink
+    karpenter.addProvisioner('custom', {
+      requirements: {
+        archTypes: [ArchType.AMD64],
+        instanceTypes: [
+          InstanceType.of(InstanceClass.M5, InstanceSize.LARGE),
+          InstanceType.of(InstanceClass.M5A, InstanceSize.LARGE),
+          InstanceType.of(InstanceClass.M6G, InstanceSize.LARGE),
+        ],
+        restrictInstanceTypes: [
+          InstanceType.of(InstanceClass.G5, InstanceSize.LARGE),
+        ],
+        capacityTypes: [CapacityType.SPOT]
+      },
+      ttlSecondsAfterEmpty: Duration.minutes(1),
+      ttlSecondsUntilExpired: Duration.days(90),
+      labels: {
+        billing: 'my-team',
+      },
+      limits: {
+        cpu: '10',
+        mem: '1000Gi',
+      },
+      consolidation: false,
+      provider: {
+        amiFamily: AMIFamily.AL2,
+        tags: {
+          Foo: 'Bar',
+        },
+      },
+    
+    
+    });
   }
 }
 
