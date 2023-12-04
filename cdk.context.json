@@ -1,0 +1,13 @@
+{
+    "app": "npx ts-node --prefer-ts-exts bin/playground-eks.ts",
+    "context": {
+      "dev": {
+        "node_group_min_size": 2,
+        "node_group_max_size": 2
+      },
+      "prod": {
+        "node_group_min_size": 5,
+        "node_group_max_size": 5
+      }
+  }
+}

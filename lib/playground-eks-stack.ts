@@ -3,7 +3,7 @@ import { Construct } from 'constructs';
 import * as eks from 'aws-cdk-lib/aws-eks';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import { KubectlV27Layer } from '@aws-cdk/lambda-layer-kubectl-v27';
-import { CfnOutput, Duration } from 'aws-cdk-lib';
+import { App, CfnOutput, Duration } from 'aws-cdk-lib';
 import { Karpenter, AMIFamily, ArchType, CapacityType } from "cdk-karpenter";
 import { InstanceClass, InstanceSize, InstanceType, EbsDeviceVolumeType, Vpc } from 'aws-cdk-lib/aws-ec2';
 import { ITable } from 'aws-cdk-lib/aws-dynamodb';
@@ -55,11 +55,11 @@ export class PlaygroundEksStack extends cdk.Stack {
 
     cluster.addNodegroupCapacity('custom-node-group', {
       instanceTypes: [new ec2.InstanceType('m5.large')],
-      minSize: 1,
-      maxSize: 1,
+      minSize: cluster.node.tryGetContext("node_group_min_size"),
+      maxSize: cluster.node.tryGetContext("node_group_max_size"),
       diskSize: 100,
       amiType: eks.NodegroupAmiType.AL2_X86_64,
-      capacityType: eks.CapacityType.SPOT,
+      capacityType: eks.CapacityType.SPOT, 
     });
 
     const serviceAccountS3 = cluster.addServiceAccount('S3BucketSA', {
