@@ -6,10 +6,19 @@ import { KubectlV27Layer } from '@aws-cdk/lambda-layer-kubectl-v27';
 import { CfnOutput, Duration } from 'aws-cdk-lib';
 import { Karpenter, AMIFamily, ArchType, CapacityType } from "cdk-karpenter";
 import { InstanceClass, InstanceSize, InstanceType, EbsDeviceVolumeType, Vpc } from 'aws-cdk-lib/aws-ec2';
+import { ITable } from 'aws-cdk-lib/aws-dynamodb';
+import { IBucket } from 'aws-cdk-lib/aws-s3';
+
+
+interface ClusterStackProps extends cdk.StackProps {
+  playgroundTable: ITable,
+  playgroundBucket: IBucket,
+}
+
 
 
 export class PlaygroundEksStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props?: ClusterStackProps) {
     super(scope, id, props);
 
     const mastersRole = new cdk.aws_iam.Role(this, 'MastersRole', {
@@ -53,7 +62,7 @@ export class PlaygroundEksStack extends cdk.Stack {
       capacityType: eks.CapacityType.SPOT,
     });
 
-    const serviceAccount = cluster.addServiceAccount('S3BucketSA', {
+    const serviceAccountS3 = cluster.addServiceAccount('S3BucketSA', {
       name: 's3bucket-sa',
       namespace: 'default',
       annotations: {
@@ -64,11 +73,23 @@ export class PlaygroundEksStack extends cdk.Stack {
       },
     });
 
-    const bucket = new cdk.aws_s3.Bucket(this, 'PlaygroundBucket', {});
-    bucket.grantReadWrite(serviceAccount);
-    new CfnOutput(this, 'ServiceAccountIamRole', { value: serviceAccount.role.roleArn });
+    const serviceAccountDynamoDB = cluster.addServiceAccount('DynamoDBSA', {
+      name: 'dynamodb-sa',
+      namespace: 'default',
+      annotations: {
+        'eks.amazonaws.com/sts-regional-endpoints': 'false',
+      },
+      labels: {
+        'test-label': 'test-value',
+      },
+    });
 
-    
+    new CfnOutput(this, 'S3ServiceAccountIamRole', { value: serviceAccountS3.role.roleArn });
+    new CfnOutput(this, 'DynamoDBServiceAccountIamRole', { value: serviceAccountDynamoDB.role.roleArn });
+
+    props?.playgroundBucket.grantReadWrite(serviceAccountS3);
+    props?.playgroundTable.grantReadWriteData(serviceAccountDynamoDB);
+
     const karpenter = new Karpenter(this, 'karpenter', {
       cluster,
       vpc,
