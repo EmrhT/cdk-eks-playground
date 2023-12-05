@@ -22,7 +22,7 @@ export class PlaygroundEksStack extends cdk.Stack {
     super(scope, id, props);
 
     const mastersRole = new cdk.aws_iam.Role(this, 'MastersRole', {
-      assumedBy: new cdk.aws_iam.ArnPrincipal('arn:aws:iam::597947213367:user/emrah-jgnk-iam'),
+      assumedBy: new cdk.aws_iam.ArnPrincipal('arn:aws:iam::597947213367:user/emrah-jgnk-iam'), // change me!
     });
 
     const vpc = new ec2.Vpc(this, 'VPC');
@@ -62,6 +62,7 @@ export class PlaygroundEksStack extends cdk.Stack {
       capacityType: eks.CapacityType.SPOT, 
     });
 
+    // for more objects of the same type, use for loops for creation
     const serviceAccountS3 = cluster.addServiceAccount('S3BucketSA', {
       name: 's3bucket-sa',
       namespace: 'default',

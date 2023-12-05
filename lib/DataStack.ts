@@ -17,7 +17,6 @@ export class DataStack extends Stack {
                 name: 'id',
                 type: AttributeType.STRING
             },
-            tableName: 'PlaygroundTable'
         })
 
         this.playgroundBucket = new aws_s3.Bucket(this, 'PlaygroundBucket', {});
