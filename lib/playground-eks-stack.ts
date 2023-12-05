@@ -126,6 +126,38 @@ export class PlaygroundEksStack extends cdk.Stack {
           Foo: 'Bar',
         },
       }
+    }),
+
+    // custom provisoner - kitchen sink
+    karpenterSpot.addProvisioner('customOnDemand', {
+      requirements: {
+        archTypes: [ArchType.AMD64],
+        instanceTypes: [
+          InstanceType.of(InstanceClass.M5, InstanceSize.LARGE),
+          InstanceType.of(InstanceClass.M5A, InstanceSize.LARGE),
+          InstanceType.of(InstanceClass.M6G, InstanceSize.LARGE),
+        ],
+        restrictInstanceTypes: [
+          InstanceType.of(InstanceClass.G5, InstanceSize.LARGE),
+        ],
+        capacityTypes: [CapacityType.ON_DEMAND]
+      },
+      ttlSecondsAfterEmpty: Duration.minutes(1),
+      ttlSecondsUntilExpired: Duration.days(90),
+      labels: {
+        capacityType: 'ondemand',
+      },
+      limits: {
+        cpu: '5',
+        mem: '500Gi',
+      },
+      consolidation: false,
+      provider: {
+        amiFamily: AMIFamily.AL2,
+        tags: {
+          Foo: 'Bar',
+        },
+      }
     });
 
   }
