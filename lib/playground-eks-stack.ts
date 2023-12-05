@@ -16,7 +16,6 @@ interface ClusterStackProps extends cdk.StackProps {
 }
 
 
-
 export class PlaygroundEksStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: ClusterStackProps) {
     super(scope, id, props);
@@ -56,6 +55,7 @@ export class PlaygroundEksStack extends cdk.Stack {
     cluster.addNodegroupCapacity('custom-node-group', {
       instanceTypes: [new ec2.InstanceType('m5.large')],
       minSize: cluster.node.tryGetContext("node_group_min_size"),
+      desiredSize: 1,
       maxSize: cluster.node.tryGetContext("node_group_max_size"),
       diskSize: 100,
       amiType: eks.NodegroupAmiType.AL2_X86_64,
@@ -91,13 +91,13 @@ export class PlaygroundEksStack extends cdk.Stack {
     props?.playgroundBucket.grantReadWrite(serviceAccountS3);
     props?.playgroundTable.grantReadWriteData(serviceAccountDynamoDB);
 
-    const karpenter = new Karpenter(this, 'karpenter', {
-      cluster,
-      vpc,
+    const karpenterSpot = new Karpenter(this, 'karpenterSpot', {
+      cluster: cluster,
+      vpc: vpc,
     });
 
     // custom provisoner - kitchen sink
-    karpenter.addProvisioner('custom', {
+    karpenterSpot.addProvisioner('customSpot', {
       requirements: {
         archTypes: [ArchType.AMD64],
         instanceTypes: [
@@ -113,7 +113,7 @@ export class PlaygroundEksStack extends cdk.Stack {
       ttlSecondsAfterEmpty: Duration.minutes(1),
       ttlSecondsUntilExpired: Duration.days(90),
       labels: {
-        billing: 'my-team',
+        capacityType: 'spot',
       },
       limits: {
         cpu: '10',
@@ -125,10 +125,9 @@ export class PlaygroundEksStack extends cdk.Stack {
         tags: {
           Foo: 'Bar',
         },
-      },
-    
-    
+      }
     });
+
   }
 }
 
