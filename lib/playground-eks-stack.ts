@@ -91,13 +91,13 @@ export class PlaygroundEksStack extends cdk.Stack {
     props?.playgroundBucket.grantReadWrite(serviceAccountS3);
     props?.playgroundTable.grantReadWriteData(serviceAccountDynamoDB);
 
-    const karpenterSpot = new Karpenter(this, 'karpenterSpot', {
+    const karpenter = new Karpenter(this, 'karpenter', {
       cluster: cluster,
       vpc: vpc,
     });
 
-    // custom provisoner - kitchen sink
-    karpenterSpot.addProvisioner('customSpot', {
+    // custom provisoner for spot instances
+    karpenter.addProvisioner('customSpot', {
       requirements: {
         archTypes: [ArchType.AMD64],
         instanceTypes: [
@@ -128,8 +128,8 @@ export class PlaygroundEksStack extends cdk.Stack {
       }
     }),
 
-    // custom provisoner - kitchen sink
-    karpenterSpot.addProvisioner('customOnDemand', {
+    // custom provisoner for ondemand instances
+    karpenter.addProvisioner('customOnDemand', {
       requirements: {
         archTypes: [ArchType.AMD64],
         instanceTypes: [
