@@ -38,7 +38,7 @@ export class PlaygroundEksStack extends cdk.Stack {
       clusterLogging: [
         eks.ClusterLoggingTypes.API,
         eks.ClusterLoggingTypes.AUTHENTICATOR,
-        eks.ClusterLoggingTypes.SCHEDULER,
+        eks.ClusterLoggingTypes.AUDIT,
       ],
       kubectlLayer: new KubectlV27Layer(this, 'kubectl')
     });
