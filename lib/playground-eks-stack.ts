@@ -10,8 +10,8 @@ import { ITable } from 'aws-cdk-lib/aws-dynamodb';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 
 
-interface ClusterStackProps extends cdk.StackProps {
-  playgroundTable: ITable,
+interface ClusterStackProps extends cdk.StackProps {  // stack objects that you'll consume is added  with interfaces
+  playgroundTable: ITable,                            // such as dynamodb table and S3 bucket here
   playgroundBucket: IBucket,
 }
 
