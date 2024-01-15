@@ -2,7 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as eks from 'aws-cdk-lib/aws-eks';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import { KubectlV27Layer } from '@aws-cdk/lambda-layer-kubectl-v27';
+import { KubectlV28Layer } from '@aws-cdk/lambda-layer-kubectl-v28';
 import { App, CfnOutput, Duration } from 'aws-cdk-lib';
 import { Karpenter, AMIFamily, ArchType, CapacityType } from "cdk-karpenter";
 import { InstanceClass, InstanceSize, InstanceType, EbsDeviceVolumeType, Vpc } from 'aws-cdk-lib/aws-ec2';
@@ -30,7 +30,7 @@ export class PlaygroundEksStack extends cdk.Stack {
       mastersRole,
       vpc: vpc,
       vpcSubnets: [{ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }],
-      version: eks.KubernetesVersion.V1_27,
+      version: eks.KubernetesVersion.V1_28,
       defaultCapacity: 0,
       albController: {
         version: eks.AlbControllerVersion.V2_6_2,
@@ -40,7 +40,7 @@ export class PlaygroundEksStack extends cdk.Stack {
         eks.ClusterLoggingTypes.AUTHENTICATOR,
         eks.ClusterLoggingTypes.AUDIT,
       ],
-      kubectlLayer: new KubectlV27Layer(this, 'kubectl')
+      kubectlLayer: new KubectlV28Layer(this, 'kubectl')
     });
 
     mastersRole.addToPolicy(new cdk.aws_iam.PolicyStatement({
