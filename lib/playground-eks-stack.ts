@@ -53,6 +53,7 @@ export class PlaygroundEksStack extends cdk.Stack {
     }));
 
     cluster.addNodegroupCapacity('custom-node-group', {
+      nodegroupName: "custom-node-group",
       instanceTypes: [new ec2.InstanceType('m5.large')],
       minSize: cluster.node.tryGetContext("node_group_min_size"),
       desiredSize: 1,
