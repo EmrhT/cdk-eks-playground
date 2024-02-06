@@ -2,12 +2,14 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as eks from 'aws-cdk-lib/aws-eks';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import { KubectlV28Layer } from '@aws-cdk/lambda-layer-kubectl-v28';
 import { App, CfnOutput, Duration } from 'aws-cdk-lib';
 import { Karpenter, AMIFamily, ArchType, CapacityType } from "cdk-karpenter";
 import { InstanceClass, InstanceSize, InstanceType, EbsDeviceVolumeType, Vpc } from 'aws-cdk-lib/aws-ec2';
 import { ITable } from 'aws-cdk-lib/aws-dynamodb';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
+
 
 
 interface ClusterStackProps extends cdk.StackProps {  // stack objects that you'll consume is added  with interfaces
@@ -64,6 +66,36 @@ export class PlaygroundEksStack extends cdk.Stack {
     });
 
     // for more objects of the same type, use for loops for creation
+    const serviceAccountEFS = cluster.addServiceAccount('EFSSA', {
+      name: 'efs-sa',
+      namespace: 'kube-system',
+      annotations: {
+        'eks.amazonaws.com/sts-regional-endpoints': 'false',
+      },
+      labels: {
+        'test-label': 'test-value',
+      },
+    });
+
+    serviceAccountEFS.role.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonEFSCSIDriverPolicy'));
+
+    // adding EFS addon to experience cfnAddon construct's implementation
+    const cfnAddon = new eks.CfnAddon(this, 'aws-efs-csi-driver', {
+      addonName: 'aws-efs-csi-driver',
+      clusterName: cluster.clusterName,
+
+      // the properties below are optional
+      // addonVersion: 'addonVersion',
+      // configurationValues: 'configurationValues',
+      // preserveOnDelete: false,
+      // resolveConflicts: 'resolveConflicts',
+      serviceAccountRoleArn: serviceAccountEFS.role.roleArn,
+      tags: [{
+        key: 'key1',
+        value: 'value1',
+      }],
+    });
+
     const serviceAccountS3 = cluster.addServiceAccount('S3BucketSA', {
       name: 's3bucket-sa',
       namespace: 'default',
@@ -85,7 +117,8 @@ export class PlaygroundEksStack extends cdk.Stack {
         'test-label': 'test-value',
       },
     });
-
+    
+    new CfnOutput(this, 'EFSServiceAccountIamRole', { value: serviceAccountEFS.role.roleArn });
     new CfnOutput(this, 'S3ServiceAccountIamRole', { value: serviceAccountS3.role.roleArn });
     new CfnOutput(this, 'DynamoDBServiceAccountIamRole', { value: serviceAccountDynamoDB.role.roleArn });
 
