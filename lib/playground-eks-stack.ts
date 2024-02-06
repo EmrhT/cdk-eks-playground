@@ -32,9 +32,9 @@ export class PlaygroundEksStack extends cdk.Stack {
       vpcSubnets: [{ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }],
       version: eks.KubernetesVersion.V1_28,
       defaultCapacity: 0,
-      albController: {
-        version: eks.AlbControllerVersion.V2_6_2,
-      },
+      // albController: {
+      //   version: eks.AlbControllerVersion.V2_6_2,
+      // },
       clusterLogging: [
         eks.ClusterLoggingTypes.API,
         eks.ClusterLoggingTypes.AUTHENTICATOR,
