@@ -23,7 +23,7 @@ export class PlaygroundEksStack extends cdk.Stack {
     super(scope, id, props);
 
     const mastersRole = new cdk.aws_iam.Role(this, 'MastersRole', {
-      assumedBy: new cdk.aws_iam.ArnPrincipal('arn:aws:iam::597947213367:user/emrah-jgnk-iam'), // change me!
+      assumedBy: new cdk.aws_iam.ArnPrincipal('arn:aws:iam::444469924026:user/cdk-deploy-user'), // change me!
     });
 
     const vpc = new ec2.Vpc(this, 'VPC');
@@ -34,9 +34,6 @@ export class PlaygroundEksStack extends cdk.Stack {
       vpcSubnets: [{ subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS }],
       version: eks.KubernetesVersion.V1_28,
       defaultCapacity: 0,
-      // albController: {
-      //   version: eks.AlbControllerVersion.V2_6_2,
-      // },
       clusterLogging: [
         eks.ClusterLoggingTypes.API,
         eks.ClusterLoggingTypes.AUTHENTICATOR,
