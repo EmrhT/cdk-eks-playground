@@ -8,9 +8,9 @@
 
 ## How to run
 1. Follow the steps described in https://cdkworkshop.com/20-typescript/20-create-project/100-cdk-init.html to initiate a blank typescript project and bootstrap CDK objects in CloudFormation.
-2. Simply run 'cdk diff/deploy --all' to provision the services to active aws account ('aws sts get-caller-identity' account )
-3. After you're done, don't forget to destroy  the resources with 'cdk destroy --all' to avoid unnecessary costs.
+2. Simply run `cdk diff/deploy --all` to provision the services to active aws account (`aws sts get-caller-identity` account )
+3. After you're done, don't forget to destroy  the resources with `cdk destroy --all` to avoid unnecessary costs.
 
 ## For context usage with different environments (optional)
 1. Bootstraping, installing dependencies and initiating the project as described above. 
-2. Run 'cdk diff/deploy --all --context env_name=dev'
+2. Run `cdk diff/deploy --all --context env_name=dev`
